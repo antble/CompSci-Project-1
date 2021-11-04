@@ -6,46 +6,40 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 
-def generate_input_values(uniform=False, stepsize=0.05):
+def generate_input_values(uniform=False, points=100):
     """Generate values which will be used as input for the Franke function."""
     if uniform:
-        x = np.random.uniform(0, 1, int(1/stepsize))
-        y = np.random.uniform(0, 1, int(1/stepsize))
+        x1 = np.random.uniform(0, 1, points)
+        x2 = np.random.uniform(0, 1, points)
     else:
-        x = np.arange(0, 1, stepsize)
-        y = np.arange(0, 1, stepsize)
-    return x, y
+        x1 = np.linspace(0, 1, points)
+        x2 = np.linspace(0, 1, points)
+    return x1, x2
 
 
-def FrankeFunction(x, y, noisy=False):
+def define_franke_function(x1, x2, noisy=False, noise_variance=1):
     """Define Franke function with or without additive noise."""
-    term1 = 0.75 * np.exp(-(0.25 * (9 * x - 2) ** 2) - 0.25 * ((9 * y - 2) ** 2))
-    term2 = 0.75 * np.exp(-((9 * x + 1) ** 2) / 49.0 - 0.1 * (9 * y + 1))
-    term3 = 0.5 * np.exp(-(9 * x - 7) ** 2 / 4.0 - 0.25 * ((9 * y - 3) ** 2))
-    term4 = -0.2 * np.exp(-(9 * x - 4) ** 2 - (9 * y - 7) ** 2)
+    term1 = 0.75 * np.exp(-(0.25 * (9 * x1 - 2) ** 2) - 0.25 * ((9 * x2 - 2) ** 2))
+    term2 = 0.75 * np.exp(-((9 * x1 + 1) ** 2) / 49.0 - 0.1 * (9 * x2 + 1))
+    term3 = 0.5 * np.exp(-(9 * x1 - 7) ** 2 / 4.0 - 0.25 * ((9 * x2 - 3) ** 2))
+    term4 = -0.2 * np.exp(-(9 * x1 - 4) ** 2 - (9 * x2 - 7) ** 2)
 
     output = term1 + term2 + term3 + term4
 
     if noisy:
-        noise = np.random.normal(0, 0.2, len(x)**2).reshape(len(x), len(x))
+        noise = np.random.normal(0, noise_variance, len(x1)**2).reshape(len(x1), len(x1))
         output = output + noise
 
     return output
 
 
-def make_design_matrix(x, y, order):
-    """Define design matrix D with intercept for given input. Order is the order of the polynomial which will be
-    fitted."""
-    # Set values of first column of design matrix to 1
-    D = np.repeat(1, len(x)).reshape(len(x), 1)
-    # reshape x and y to correct dimensions
-    x = x.reshape(len(x), 1)
-    y = y.reshape(len(y), 1)
-    # D's columns are defined as [intercept, x, y, x**i, y**i] for i in  1:order
-    for power in range(1, order+1):
-        D = np.append(D, x**power, axis=-1)
-        D = np.append(D, y**power, axis=-1)
-    return D
+def generate_data(noisy=False, noise_variance=1, uniform=False, points=100):
+    """Combine input creation and output from Franke function."""
+    x1, x2, = generate_input_values(uniform, points)
+    x1_mesh, x2_mesh = np.meshgrid(x1, x2)
+    f = define_franke_function(x1_mesh, x2_mesh, noisy, noise_variance)
+
+    return x1_mesh, x2_mesh, f
 
 
 def make_plot(x, y, z):
@@ -68,15 +62,8 @@ if __name__ == "__main__":
     # To make results comparable the seed() method is used
     np.random.seed(2021)
 
-    # Generate input for Franke function
-    x, y = generate_input_values(uniform=True)
-    x_mesh, y_mesh = np.meshgrid(x, y)
-
-    # Call Franke function
-    z = FrankeFunction(x_mesh, y_mesh, True)
+    # Generate data
+    x1, x2, f = generate_data()
 
     # Create plot of Franke function
-    make_plot(x_mesh, y_mesh, z)
-
-    # Create design matrix
-    design = make_design_matrix(x, y, 2)
+    make_plot(x1, x2, f)
