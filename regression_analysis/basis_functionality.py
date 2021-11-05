@@ -2,7 +2,7 @@
 import numpy as np
 
 
-# Define class which contains all linear regression related variables with 2D input
+# Define class which contains design matrix with 2D input
 class Design_Matrix_2D:
     def __init__(self, x1, x2, f, order):
         self.x1 = x1
@@ -51,3 +51,22 @@ class Design_Matrix_2D:
             A_inverse = np.dot(V_t.T, np.dot(S_inverse, U.T))
 
         return A_inverse
+
+
+# Class which contains functionality to judge fit of the model
+class Error_Measures:
+    def __init__(self, observed_values, model_values):
+        self.observed_values = observed_values.flatten()
+        self.model_values = model_values.flatten()
+
+    def mean_squared_error(self):
+        """Calculate mean squared error of fitted model"""
+        MSE = (1/len(self.observed_values))*np.sum((self.observed_values - self.model_values)**2)
+        return MSE
+
+    def r2_score(self):
+        """Calculate R2 score"""
+        oben = len(self.observed_values)*self.mean_squared_error()
+        unten = np.sum((self.observed_values - np.mean(self.model_values))**2)
+        R2 = 1 - (oben/unten)
+        return R2

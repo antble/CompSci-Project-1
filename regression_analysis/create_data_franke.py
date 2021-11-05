@@ -1,9 +1,9 @@
 """script to create data file based on the Franke function"""
 
+import create_plots as own_plots
+
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import cm
-from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 
 def generate_input_values(uniform=False, points=100):
@@ -42,22 +42,6 @@ def generate_data(noisy=False, noise_variance=1, uniform=False, points=100):
     return x1_mesh, x2_mesh, f
 
 
-def make_plot(x, y, z):
-    """Create 3D surface plot of given input."""
-    # Create figure and axes for plot
-    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-    # Plot the surface.
-    surf = ax.plot_surface(x, y, z, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-    # Customize the z axis.
-    ax.set_zlim(-0.10, 1.40)
-    ax.zaxis.set_major_locator(LinearLocator(10))
-    ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
-    # Add a color bar which maps values to colors.
-    fig.colorbar(surf, shrink=0.5, aspect=5)
-    # Display plot
-    plt.show()
-
-
 if __name__ == "__main__":
     # To make results comparable the seed() method is used
     np.random.seed(2021)
@@ -66,4 +50,6 @@ if __name__ == "__main__":
     x1, x2, f = generate_data()
 
     # Create plot of Franke function
-    make_plot(x1, x2, f)
+    own_plots.make_3d_surface_plot(x1, x2, f, "Plot of Franke funtion")
+    # Display plot
+    plt.show()
