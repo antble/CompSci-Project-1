@@ -133,3 +133,4 @@ dmypy.json
 
 # Visual Studio Code
 .vs
+.vscode
