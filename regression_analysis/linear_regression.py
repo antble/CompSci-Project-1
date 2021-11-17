@@ -31,6 +31,14 @@ def find_params(X, y_train):
 
 class linear_regression2D():
     def __init__(self, x1, x2, y, **kwargs):
+        self.n_points = y.shape[0]
+        #fixing data dimensions
+        if(len(x1.shape)==1 or len(x1.shape)==1 or len(x1.shape)==1):
+            x1 = x1.reshape(self.n_points, 1)
+            x2 = x2.reshape(self.n_points, 1)
+            y = y.reshape(self.n_points, 1)
+
+
         self.x1 = x1 #input 2Ddata
         self.x2 = x2
         self.y = y #output
@@ -51,7 +59,7 @@ class linear_regression2D():
             x2_test = x_test[:, 1]
         else:
             x1_train = self.x1.flatten()
-            x2_train = selfx2.flatten()
+            x2_train = self.x2.flatten()
             x1_test = np.array([])
             x2_test = np.array([])
             y_train = self.y
@@ -71,7 +79,7 @@ class linear_regression2D():
             self.testMSE = findStat.findMSE(y_test, y_model_test)
             self.testR2 = findStat.findR2(y_test, y_model_test)
 
-    def apply_ols_with_bootstrap(self,order=3, test_ratio=0.1, n_boots=10):
+    def apply_ols_with_bootstrap(self, order=3, test_ratio=0.1, n_boots=10):
         [self.trainMSE, self.trainR2, self.testMSE, self.testR2] = [0.0, 0.0, 0.0, 0.0]
         for run in range(n_boots):
             x_train, x_test, y_train, y_test = sampling.bootstrap(np.hstack([self.x1, self.x2]), self.y, sample_ratio=test_ratio)
@@ -83,9 +91,6 @@ class linear_regression2D():
 
             #find train design matrix
             X = design_mat2D(x1_train, x2_train, order)
-            print(x1_train.shape)
-            print(y_train.shape)
-            print(X.shape)
             #finding model parameters
             beta = find_params(X, y_train)
 
@@ -101,7 +106,10 @@ class linear_regression2D():
         self.trainR2 /= n_boots
         self.testR2 /= n_boots
 
-    def apply_ols_with_crossvalidation(self, order=3, test_ratio=0.1, kfolds=10):
+    def apply_ols_with_crossvalidation(self, order=3, kfolds=10):
+        """
+        Apply OLS with cross validation sampling to the data. The parameter kfolds determines number of folds
+        """
         [self.trainMSE, self.trainR2, self.testMSE, self.testR2] = [0.0, 0.0, 0.0, 0.0]
 
         x_train_arr, x_test_arr, y_train_arr, y_test_arr = sampling.crossvalidation(np.hstack([self.x1, self.x2]), self.y, kfolds)
@@ -115,11 +123,9 @@ class linear_regression2D():
 
             y_train = y_train_arr[k,:].reshape(len(y_train_arr[k,:]),1)
             y_test = y_test_arr[k,:].reshape(len(y_test_arr[k,:]),1)
+
             #find train design matrix
             X = design_mat2D(x1_train, x2_train, order)
-            print(x1_train.shape)
-            print(y_train.shape)
-            print(X.shape)
             #finding model parameters
             beta = find_params(X, y_train)
 
@@ -134,54 +140,5 @@ class linear_regression2D():
         self.testMSE /= kfolds
         self.trainR2 /= kfolds
         self.testR2 /= kfolds
-
-        #shuffle data before binning
-
-
-        """
-        ind = np.arange(self.n_points)
-        npr.shuffle(ind)
-        x1 = self.x1[ind]
-        x2 = self.x2[ind]
-        y = self.y[ind]
-        x1 = x1.reshape(self.n_points)
-        x2 = x2.reshape(self.n_points)
-        num_per_fold = int(np.floor(self.n_points/kfolds))
-        """
         
         
-        """
-        for k in np.arange(kfolds):
-            #if(k != kfolds-1):
-            test_ind = np.arange(k*num_per_fold,(k+1)*num_per_fold)
-            train_ind = np.delete(np.arange(self.n_points), test_ind)
-            print(k)
-            x1_test = x1[test_ind]
-            x2_test = x1[test_ind]
-            y_test = y[test_ind]
-            x1_train = x1[train_ind]#np.array([x for x in x1 if x not in x1_test])
-            x2_train = x2[train_ind]
-            y_train = y[train_ind]
-
-            #find train design matrix
-            X = design_mat2D(x1_train, x2_train, order)
-            print(x1_train.shape)
-            print(x1_test.shape)
-            print(y_train.shape)
-            print(X.shape)
-            #finding model parameters
-            beta = find_params(X, y_train)
-
-            y_model_test = np.array(design_mat2D(x1_test, x2_test, order) @ beta) #fitting testing data
-            y_model_train = np.array(design_mat2D(x1_train, x2_train, order) @ beta) #fitting training data
-
-            self.trainMSE += findStat.findMSE(y_train, y_model_train)
-            self.trainR2 += findStat.findR2(y_train, y_model_train)
-            self.testMSE += findStat.findMSE(y_test, y_model_test)
-            self.testR2 += findStat.findR2(y_test, y_model_test)
-            print(self.testMSE)
-        self.trainMSE /= kfolds
-        self.testMSE /= kfolds
-        self.trainR2 /= kfolds
-        self.testR2 /= kfolds
-        """

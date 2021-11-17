@@ -32,9 +32,6 @@ def crossvalidation(x, y, kfolds):
     x_train_arr = np.zeros([kfolds, n-nk, 2])
     y_train_arr = np.zeros([kfolds, n-nk])
 
-    print("nk is: ", nk)
-    print("n-nk is: ", n-nk)
-
     for k in np.arange(kfolds):
         test_ind = np.arange(k*nk,(k+1)*nk)
         train_ind = np.delete(np.arange(n), test_ind)
