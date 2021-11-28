@@ -9,20 +9,23 @@ param: deg degrees of the polynomial
 param: N number of points in linspace
 param: noise_var tuner of the added noise
 '''
+
+
+# --------- PART (a) code starts here --------------------
 np.random.seed(2021)
 
 deg = 5
 N = 100
-noise_var = 0.0
-
+noise_var = 0.5
+num_degrees = 10
 x, y, z = create_data(N, noise_var)
+for deg in range(num_degrees):
+    X = create_design_matrix(x, y, deg)
+    X_train, X_test, z_train, z_test = train_test_split(X, z, test_size=0.1)
+    train_data = (X_train, z_train)
+    test_data = (X_test, z_test)
 
-X = create_design_matrix(x, y, deg)
-X_train, X_test, z_train, z_test = train_test_split(X, z, test_size=0.1)
-train_data = (X_train, z_train)
-test_data = (X_test, z_test)
+    z_predict, _ = ols_model(train_data, X_test)
+    stats = statistics(z_test, z_predict)
 
-z_predict, _ = ols_model(train_data, X_test)
-stats = statistics(z_test, z_predict)
-
-print(stats)
+    print(stats)

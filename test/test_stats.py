@@ -4,6 +4,8 @@ from src.utils import create_design_matrix, create_data
 from src.utils import min_max_scaling 
 from sklearn.preprocessing import MinMaxScaler
 import numpy.polynomial.polynomial as poly
+from src.models import ols_model, ols_model_skl
+from sklearn.model_selection import train_test_split
 import numpy as np 
 
 
@@ -38,3 +40,18 @@ class TestUtils(unittest.TestCase):
     #     self.assertTrue(np.allclose(X_own, X_skl))
 
 
+    def test_mse_calculation(self):
+        np.random.seed(2021)
+        x = np.linspace(0, 1, 11)
+        X_vander = np.flip(np.vander(x, 3), axis=1)
+        true_beta = [2, 0.5, 3.7]
+        y_true = np.sum(np.array([x**p*b for p, b in enumerate(true_beta)]), axis=0)
+        X_train, X_test, y_train, y_test = (X_vander, X_vander, y_true, y_true)
+        y_predict_own, _ = ols_model((X_train, y_train), X_test)
+        y_predict_skl, _ = ols_model_skl((X_train, y_train), X_test)
+        print(y_predict_own.shape, y_predict_skl.shape)
+        print(y_predict_own, y_predict_skl)
+        MSE_calc = 0.00411363461744314140
+        stats_skl = statistics(y_test, y_predict_skl)
+        stats_own = statistics(y_test, y_predict_own)
+        self.assertAlmostEqual(MSE_calc, stats_skl['MSE'])

@@ -66,5 +66,5 @@ def statistics(y_test, y_predict):
         variance = np.mean(np.var(y_pred, axis=1, keepdims=True))
         return bias, variance, error
 
-    statistics = {'MSE': MSE(y_test, y_predict), 'R2': R2(y_test, y_predict), 'EBV': error_bias_variance(y_test, y_predict)}
+    statistics = {'MSE': MSE(y_test, y_predict), 'R2': R2(y_test, y_predict)}# 'EBV': error_bias_variance(y_test, y_predict)}
     return statistics
