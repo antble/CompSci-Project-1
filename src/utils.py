@@ -37,11 +37,11 @@ def create_data(N=20, var=0.0):
     x, y = np.meshgrid(x1, y1)
 
     if var != 0.0:
-        z = FrankeFunction(x, y)
-        z = z + np.random.normal(size=z.shape)
+        z = FrankeFunction(x.flatten(), y.flatten())
+        z = z + var*np.random.normal(size=z.shape)
     else:
-        z = FrankeFunction(x, y)
-    return x1, y1, z
+        z = FrankeFunction(x.flatten(), y.flatten())
+    return x1, y1, x, y, z
 
 
 def create_design_matrix(x1, y1, degree):
@@ -52,7 +52,7 @@ def create_design_matrix(x1, y1, degree):
     return X
 
 
-def statistics(y_test, y_predict):
+def statistics(y_test, y_predict, sampling=None):
     def R2(y_data, y_predict):
         return 1 - np.sum((y_data - y_predict)**2)/np.sum((y_data - np.mean(y_data))**2)
 
@@ -60,11 +60,13 @@ def statistics(y_test, y_predict):
         n = np.size(y_predict)
         return np.sum((y_data-y_predict)**2)/n
 
-    def error_bias_variance(y_pred, y_test):
-        error = np.mean(np.mean((y_pred-y_test)**2, axis=1, keepdims=True))
-        bias = np.mean((y_test-np.mean(y_pred, axis=1, keepdims=True))**2)
-        variance = np.mean(np.var(y_pred, axis=1, keepdims=True))
-        return bias, variance, error
-
-    statistics = {'MSE': MSE(y_test, y_predict), 'R2': R2(y_test, y_predict)}# 'EBV': error_bias_variance(y_test, y_predict)}
+    if sampling is not None:
+        def error_bias_variance(y_pred, y_test):
+            error = np.mean(np.mean((y_pred-y_test)**2, axis=1, keepdims=True))
+            bias = np.mean((y_test-np.mean(y_pred, axis=1, keepdims=True))**2)
+            variance = np.mean(np.var(y_pred, axis=1, keepdims=True))
+            return bias, variance, error
+        statistics = {'MSE': MSE(y_test, y_predict), 'R2': R2(y_test, y_predict), 'EBV': error_bias_variance(y_test, y_predict)}
+    else:
+        statistics = {'MSE': MSE(y_test, y_predict), 'R2': R2(y_test, y_predict)}
     return statistics

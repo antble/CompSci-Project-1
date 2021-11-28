@@ -6,14 +6,14 @@ from sklearn import linear_model
 OLS Regression
 '''
 
-def ols_model(train_data, X_test):
+def ols_model(train_data, X_test, *args):
     X_train, y_train = train_data
     beta = np.linalg.pinv(X_train.T @ X_train) @ X_train.T @ y_train
     y_predict = X_test @ beta
     return y_predict, beta
 
 
-def ols_model_skl(train_data, X_test):
+def ols_model_skl(train_data, X_test, *args):
     X_train, y_train = train_data
     ols = linear_model.LinearRegression(fit_intercept=False)
     ols.fit(X_train, y_train)
@@ -25,7 +25,7 @@ def ols_model_skl(train_data, X_test):
 Ridge regression
 '''
 
-def ridge_model(train_data, X_test, lmb):
+def ridge_model(train_data, X_test, lmb=0):
     X_train, y_train = train_data
     p = (X_train.T @ X_train).shape
     identity_matrix = np.eye(p[0], p[1])
@@ -45,7 +45,7 @@ def ridge_model_skl(train_data, X_test, lmb):
 LASSO Regression
 '''
 
-def lasso_model_skl(train_data, X_test, lmb):
+def lasso_model_skl(train_data, X_test, lmb=0):
     X_train, y_train = train_data
     lasso = linear_model.Lasso(lmb, fit_intercept=False, tol=1e-2)
     lasso.fit(X_train, y_train)

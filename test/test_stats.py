@@ -45,13 +45,19 @@ class TestUtils(unittest.TestCase):
         x = np.linspace(0, 1, 11)
         X_vander = np.flip(np.vander(x, 3), axis=1)
         true_beta = [2, 0.5, 3.7]
-        y_true = np.sum(np.array([x**p*b for p, b in enumerate(true_beta)]), axis=0)
+        noise = 0.1 * np.random.normal(size=len(x))
+        y_true = np.sum(np.array([x**p*b for p, b in enumerate(true_beta)]), axis=0) + noise
         X_train, X_test, y_train, y_test = (X_vander, X_vander, y_true, y_true)
-        y_predict_own, _ = ols_model((X_train, y_train), X_test)
-        y_predict_skl, _ = ols_model_skl((X_train, y_train), X_test)
+        assert np.array_equal(X_train, X_test)
+        assert np.array_equal(y_train, y_test)
+        y_predict_own, beta_own = ols_model((X_train, y_train), X_test)
+        y_predict_skl, beta_skl = ols_model_skl((X_train, y_train), X_test)
         print(y_predict_own.shape, y_predict_skl.shape)
         print(y_predict_own, y_predict_skl)
+        print(beta_skl, beta_own)
         MSE_calc = 0.00411363461744314140
         stats_skl = statistics(y_test, y_predict_skl)
         stats_own = statistics(y_test, y_predict_own)
+        print(stats_skl['MSE'], stats_own['MSE'])
+        np.testing.assert_almost_equal(stats_skl['MSE'], stats_own['MSE'])
         self.assertAlmostEqual(MSE_calc, stats_skl['MSE'])
